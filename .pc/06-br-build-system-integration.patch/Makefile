@@ -159,11 +159,11 @@ gconf-objs	:= gconf.o zconf.tab.o
 
 hostprogs-y := conf
 
-ifeq ($(MAKECMDGOALS),nconf)
+ifeq ($(MAKECMDGOALS),nconfig)
 	hostprogs-y += nconf
 endif
 
-ifeq ($(MAKECMDGOALS),mconf)
+ifeq ($(MAKECMDGOALS),menuconfig)
 	hostprogs-y += mconf
 endif
 
@@ -171,10 +171,10 @@ ifeq ($(MAKECMDGOALS),update-po-config)
 	hostprogs-y += kxgettext
 endif
 
-ifeq ($(MAKECMDGOALS),qconf)
+ifeq ($(MAKECMDGOALS),xconfig)
 	qconf-target := 1
 endif
-ifeq ($(MAKECMDGOALS),gconf)
+ifeq ($(MAKECMDGOALS),gconfig)
 	gconf-target := 1
 endif
 
@@ -309,8 +309,11 @@ $(obj)/zconf.tab.o: $(obj)/zconf.lex.c $(obj)/zconf.hash.c
 
 $(obj)/qconf.o: $(obj)/qconf.moc
 
+quiet_cmd_moc = MOC     $@
+      cmd_moc = $(KC_QT_MOC) -i $< -o $@
+
 $(obj)/%.moc: $(src)/%.h $(obj)/.tmp_qtcheck
-	$(KC_QT_MOC) -i $< -o $@
+	$(call cmd,moc)
 
 # Extract gconf menu items for I18N support
 $(obj)/gconf.glade.h: $(obj)/gconf.glade
