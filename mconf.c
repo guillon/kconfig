@@ -176,9 +176,9 @@ menu_instructions[] = N_(
 	"Arrow keys navigate the menu.  "
 	"<Enter> selects submenus ---> (or empty submenus ----).  "
 	"Highlighted letters are hotkeys.  "
-	"Pressing <Y> selectes a feature, while <N> will exclude a feature.  "
+	"Pressing <Y> includes, <N> excludes, <M> modularizes features.  "
 	"Press <Esc><Esc> to exit, <?> for Help, </> for Search.  "
-	"Legend: [*] feature is selected  [ ] feature is excluded"),
+	"Legend: [*] built-in  [ ] excluded  <M> module  < > module capable"),
 radiolist_instructions[] = N_(
 	"Use the arrow keys to navigate this window or "
 	"press the hotkey of the item you wish to select "
@@ -959,7 +959,7 @@ static int handle_exit(void)
 	if (conf_get_changed())
 		res = dialog_yesno(NULL,
 				   _("Do you wish to save your new configuration?\n"
-				     "(Press <ESC><ESC> to continue Buildroot configuration.)"),
+				     "(Press <ESC><ESC> to continue kernel configuration.)"),
 				   6, 60);
 	else
 		res = -1;
