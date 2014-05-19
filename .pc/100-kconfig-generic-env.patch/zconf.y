@@ -493,7 +493,7 @@ void conf_parse(const char *name)
 
 	sym_init();
 	_menu_init();
-	rootmenu.prompt = menu_add_prompt(P_MENU, PRODUCT" Configuration", NULL);
+	rootmenu.prompt = menu_add_prompt(P_MENU, "Buildroot Configuration", NULL);
 
 	if (getenv("ZCONF_DEBUG"))
 		zconfdebug = 1;

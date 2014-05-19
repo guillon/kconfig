@@ -524,7 +524,7 @@ int main(int ac, char **av)
 			gettimeofday(&now, NULL);
 			seed = (unsigned int)((now.tv_sec + 1) * (now.tv_usec + 1));
 
-			seed_env = getenv(PRODUCT_ENV"_SEED");
+			seed_env = getenv("KCONFIG_SEED");
 			if( seed_env && *seed_env ) {
 				char *endp;
 				int tmp = (int)strtol(seed_env, &endp, 0);
@@ -532,7 +532,7 @@ int main(int ac, char **av)
 					seed = tmp;
 				}
 			}
-			fprintf( stderr, PRODUCT_ENV"_SEED=0x%X\n", seed );
+			fprintf( stderr, "KCONFIG_SEED=0x%X\n", seed );
 			srand(seed);
 			break;
 		}
@@ -595,7 +595,7 @@ int main(int ac, char **av)
 	case allmodconfig:
 	case alldefconfig:
 	case randconfig:
-		name = getenv(PRODUCT_ENV"_ALLCONFIG");
+		name = getenv("KCONFIG_ALLCONFIG");
 		if (!name)
 			break;
 		if ((strcmp(name, "") != 0) && (strcmp(name, "1") != 0)) {
@@ -618,7 +618,7 @@ int main(int ac, char **av)
 		if (conf_read_simple(name, S_DEF_USER) &&
 		    conf_read_simple("all.config", S_DEF_USER)) {
 			fprintf(stderr,
-				_("*** "PRODUCT_ENV"_ALLCONFIG set, but no \"%s\" or \"all.config\" file found\n"),
+				_("*** KCONFIG_ALLCONFIG set, but no \"%s\" or \"all.config\" file found\n"),
 				name);
 			exit(1);
 		}
@@ -629,7 +629,7 @@ int main(int ac, char **av)
 
 	if (sync_kconfig) {
 		if (conf_get_changed()) {
-			name = getenv(PRODUCT_ENV"_NOSILENTUPDATE");
+			name = getenv("KCONFIG_NOSILENTUPDATE");
 			if (name && *name) {
 				fprintf(stderr,
 					_("\n*** The configuration requires explicit update.\n\n"));

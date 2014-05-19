@@ -1,0 +1,282 @@
+ Makefile            |    8 ++++++--
+ conf.c              |   10 +++++-----
+ confdata.c          |   16 ++++++++--------
+ expr.h              |    2 +-
+ gconf.glade         |    2 +-
+ lkc.h               |   15 +++++++++++++++
+ mconf.c             |    2 +-
+ merge_config.sh     |    3 ++-
+ qconf.cc            |    2 +-
+ zconf.tab.c_shipped |    2 +-
+ zconf.y             |    2 +-
+ 11 files changed, 42 insertions(+), 22 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 7eb4071..9dade34 100644
+--- a/Makefile
++++ b/Makefile
+@@ -11,6 +11,10 @@ else
+ Kconfig := Kconfig
+ endif
+ 
++ifndef KBUILD_CONFIG_DIR
++KBUILD_CONFIG_DIR=arch/$(SRCARCH)/configs
++endif
++
+ # We need this, in case the user has it in its environment
+ unexport CONFIG_
+ 
+@@ -98,11 +102,11 @@ ifeq ($(KBUILD_DEFCONFIG),)
+ 	$< --defconfig $(Kconfig)
+ else
+ 	@echo "*** Default configuration is based on '$(KBUILD_DEFCONFIG)'"
+-	$(Q)$< --defconfig=arch/$(SRCARCH)/configs/$(KBUILD_DEFCONFIG) $(Kconfig)
++	$(Q)$< --defconfig=$(KBUILD_CONFIG_DIR)/$(KBUILD_DEFCONFIG) $(Kconfig)
+ endif
+ 
+ %_defconfig: $(obj)/conf
+-	$(Q)$< --defconfig=arch/$(SRCARCH)/configs/$@ $(Kconfig)
++	$(Q)$< --defconfig=$(KBUILD_CONFIG_DIR)/$@ $(Kconfig)
+ 
+ # Help text used by make help
+ help:
+diff --git a/conf.c b/conf.c
+index 553fc76..6780bd3 100644
+--- a/conf.c
++++ b/conf.c
+@@ -524,7 +524,7 @@ int main(int ac, char **av)
+ 			gettimeofday(&now, NULL);
+ 			seed = (unsigned int)((now.tv_sec + 1) * (now.tv_usec + 1));
+ 
+-			seed_env = getenv("KCONFIG_SEED");
++			seed_env = getenv(PRODUCT_ENV"_SEED");
+ 			if( seed_env && *seed_env ) {
+ 				char *endp;
+ 				int tmp = (int)strtol(seed_env, &endp, 0);
+@@ -532,7 +532,7 @@ int main(int ac, char **av)
+ 					seed = tmp;
+ 				}
+ 			}
+-			fprintf( stderr, "KCONFIG_SEED=0x%X\n", seed );
++			fprintf( stderr, PRODUCT_ENV"_SEED=0x%X\n", seed );
+ 			srand(seed);
+ 			break;
+ 		}
+@@ -595,7 +595,7 @@ int main(int ac, char **av)
+ 	case allmodconfig:
+ 	case alldefconfig:
+ 	case randconfig:
+-		name = getenv("KCONFIG_ALLCONFIG");
++		name = getenv(PRODUCT_ENV"_ALLCONFIG");
+ 		if (!name)
+ 			break;
+ 		if ((strcmp(name, "") != 0) && (strcmp(name, "1") != 0)) {
+@@ -618,7 +618,7 @@ int main(int ac, char **av)
+ 		if (conf_read_simple(name, S_DEF_USER) &&
+ 		    conf_read_simple("all.config", S_DEF_USER)) {
+ 			fprintf(stderr,
+-				_("*** KCONFIG_ALLCONFIG set, but no \"%s\" or \"all.config\" file found\n"),
++				_("*** "PRODUCT_ENV"_ALLCONFIG set, but no \"%s\" or \"all.config\" file found\n"),
+ 				name);
+ 			exit(1);
+ 		}
+@@ -629,7 +629,7 @@ int main(int ac, char **av)
+ 
+ 	if (sync_kconfig) {
+ 		if (conf_get_changed()) {
+-			name = getenv("KCONFIG_NOSILENTUPDATE");
++			name = getenv(PRODUCT_ENV"_NOSILENTUPDATE");
+ 			if (name && *name) {
+ 				fprintf(stderr,
+ 					_("\n*** The configuration requires explicit update.\n\n"));
+diff --git a/confdata.c b/confdata.c
+index 2371fa8..506a956 100644
+--- a/confdata.c
++++ b/confdata.c
+@@ -64,14 +64,14 @@ static void conf_message(const char *fmt, ...)
+ 
+ const char *conf_get_configname(void)
+ {
+-	char *name = getenv("BR2_CONFIG");
++	char *name = getenv(PRODUCT_ENV"_CONFIG");
+ 
+ 	return name ? name : ".config";
+ }
+ 
+ const char *conf_get_autoconfig_name(void)
+ {
+-	return getenv("KCONFIG_AUTOCONFIG");
++	return getenv(PRODUCT_ENV"_AUTOCONFIG");
+ }
+ 
+ static char *conf_expand_value(const char *in)
+@@ -767,7 +767,7 @@ int conf_write(const char *name)
+ 		basename = conf_get_configname();
+ 
+ 	sprintf(newname, "%s%s", dirname, basename);
+-	env = getenv("KCONFIG_OVERWRITECONFIG");
++	env = getenv(PRODUCT_ENV"_OVERWRITECONFIG");
+ 	if (!env || !*env) {
+ 		sprintf(tmpname, "%s.tmpconfig.%d", dirname, (int)getpid());
+ 		out = fopen(tmpname, "w");
+@@ -1027,13 +1027,13 @@ int conf_write_autoconf(void)
+ 	fclose(tristate);
+ 	fclose(out_h);
+ 
+-	name = getenv("KCONFIG_AUTOHEADER");
++	name = getenv(PRODUCT_ENV"_AUTOHEADER");
+ 	if (!name)
+ 		name = "include/generated/autoconf.h";
+ 	sprintf(buf, "%s.tmpconfig.h", dir);
+ 	if (rename(buf, name))
+ 		return 1;
+-	name = getenv("KCONFIG_TRISTATE");
++	name = getenv(PRODUCT_ENV"_TRISTATE");
+ 	if (!name)
+ 		name = "include/config/tristate.conf";
+ 	sprintf(buf, "%s.tmpconfig_tristate", dir);
+@@ -1159,7 +1159,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
+ 				   * -Wmaybe-uninitialized */
+ 	if (mode == def_random) {
+ 		int n, p[3];
+-		char *env = getenv("KCONFIG_PROBABILITY");
++		char *env = getenv(PRODUCT_ENV"_PROBABILITY");
+ 		n = 0;
+ 		while( env && *env ) {
+ 			char *endp;
+@@ -1168,7 +1168,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
+ 				p[n++] = tmp;
+ 			} else {
+ 				errno = ERANGE;
+-				perror( "KCONFIG_PROBABILITY" );
++				perror( PRODUCT_ENV"_PROBABILITY" );
+ 				exit( 1 );
+ 			}
+ 			env = (*endp == ':') ? endp+1 : endp;
+@@ -1190,7 +1190,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
+ 
+ 		if( pty+ptm > 100 ) {
+ 			errno = ERANGE;
+-			perror( "KCONFIG_PROBABILITY" );
++			perror( PRODUCT_ENV"_PROBABILITY" );
+ 			exit( 1 );
+ 		}
+ 	}
+diff --git a/expr.h b/expr.h
+index ba663e1..6d23580 100644
+--- a/expr.h
++++ b/expr.h
+@@ -93,7 +93,7 @@ struct symbol {
+ #define SYMBOL_CHOICEVAL  0x0020  /* used as a value in a choice block */
+ #define SYMBOL_VALID      0x0080  /* set when symbol.curr is calculated */
+ #define SYMBOL_OPTIONAL   0x0100  /* choice is optional - values can be 'n' */
+-#define SYMBOL_WRITE      0x0200  /* write symbol to file (KCONFIG_CONFIG) */
++#define SYMBOL_WRITE      0x0200  /* write symbol to file (PRODUCT_ENV"_CONFIG") */
+ #define SYMBOL_CHANGED    0x0400  /* ? */
+ #define SYMBOL_AUTO       0x1000  /* value from environment variable */
+ #define SYMBOL_CHECKED    0x2000  /* used during dependency checking */
+diff --git a/gconf.glade b/gconf.glade
+index 6cbc1bb..d95dc73 100644
+--- a/gconf.glade
++++ b/gconf.glade
+@@ -4,7 +4,7 @@
+ 
+ <widget class="GtkWindow" id="window1">
+   <property name="visible">True</property>
+-  <property name="title" translatable="yes">Gtk Buildroot Configurator</property>
++  <property name="title" translatable="yes">Gtk PRODUCT Configurator</property>
+   <property name="type">GTK_WINDOW_TOPLEVEL</property>
+   <property name="window_position">GTK_WIN_POS_NONE</property>
+   <property name="modal">False</property>
+diff --git a/lkc.h b/lkc.h
+index 09f4edf..80ea01f 100644
+--- a/lkc.h
++++ b/lkc.h
+@@ -21,6 +21,21 @@ static inline char *bind_textdomain_codeset(const char *dn, char *c) { return c;
+ extern "C" {
+ #endif
+ 
++#ifndef PRODUCT_ENV
++/* BR2 for buildroot, KCONFIG for kernel. */
++#define PRODUCT_ENV "KCONFIG"
++#endif
++
++#ifndef PRODUCT
++/* Buildroot buildroot, Kernel for kernel. */
++#define PRODUCT "Kernel"
++#endif
++
++#ifndef PRODUCT_DOMAIN
++/* buildroot.org for buildroot, kernel.org for kernel. */
++#define PRODUCT_DOMAIN "kernel.org"
++#endif
++
+ #define P(name,type,arg)	extern type name arg
+ #include "lkc_proto.h"
+ #undef P
+diff --git a/mconf.c b/mconf.c
+index 7d6cf80..3151255 100644
+--- a/mconf.c
++++ b/mconf.c
+@@ -959,7 +959,7 @@ static int handle_exit(void)
+ 	if (conf_get_changed())
+ 		res = dialog_yesno(NULL,
+ 				   _("Do you wish to save your new configuration?\n"
+-				     "(Press <ESC><ESC> to continue Buildroot configuration.)"),
++				     "(Press <ESC><ESC> to continue "PRODUCT" configuration.)"),
+ 				   6, 60);
+ 	else
+ 		res = -1;
+diff --git a/merge_config.sh b/merge_config.sh
+index 81b0c61..88d278c 100755
+--- a/merge_config.sh
++++ b/merge_config.sh
+@@ -131,7 +131,8 @@ fi
+ # Use the merged file as the starting point for:
+ # alldefconfig: Fills in any missing symbols with Kconfig default
+ # allnoconfig: Fills in any missing symbols with # CONFIG_* is not set
+-make KCONFIG_ALLCONFIG=$TMP_FILE $OUTPUT_ARG $ALLTARGET
++PRODUCT_ENV=${PRODUCT_ENV:-KCONFIG}
++make ${PRODUCT_ENV}_ALLCONFIG=$TMP_FILE $OUTPUT_ARG $ALLTARGET
+ 
+ 
+ # Check all specified config values took (might have missed-dependency issues)
+diff --git a/qconf.cc b/qconf.cc
+index f630567..2443af1 100644
+--- a/qconf.cc
++++ b/qconf.cc
+@@ -70,7 +70,7 @@ static inline QString qgettext(const QString& str)
+ }
+ 
+ ConfigSettings::ConfigSettings()
+-	: QSettings("buildroot.org", "qconf")
++	: QSettings(PRODUCT_DOMAIN, "qconf")
+ {
+ }
+ 
+diff --git a/zconf.tab.c_shipped b/zconf.tab.c_shipped
+index f343030..81d1319 100644
+--- a/zconf.tab.c_shipped
++++ b/zconf.tab.c_shipped
+@@ -2297,7 +2297,7 @@ void conf_parse(const char *name)
+ 
+ 	sym_init();
+ 	_menu_init();
+-	rootmenu.prompt = menu_add_prompt(P_MENU, "Buildroot Configuration", NULL);
++	rootmenu.prompt = menu_add_prompt(P_MENU, PRODUCT" Configuration", NULL);
+ 
+ 	if (getenv("ZCONF_DEBUG"))
+ 		zconfdebug = 1;
+diff --git a/zconf.y b/zconf.y
+index 08ac041..33b4a54 100644
+--- a/zconf.y
++++ b/zconf.y
+@@ -493,7 +493,7 @@ void conf_parse(const char *name)
+ 
+ 	sym_init();
+ 	_menu_init();
+-	rootmenu.prompt = menu_add_prompt(P_MENU, "Buildroot Configuration", NULL);
++	rootmenu.prompt = menu_add_prompt(P_MENU, PRODUCT" Configuration", NULL);
+ 
+ 	if (getenv("ZCONF_DEBUG"))
+ 		zconfdebug = 1;

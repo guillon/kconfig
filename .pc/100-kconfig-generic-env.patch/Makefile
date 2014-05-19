@@ -11,10 +11,6 @@ else
 Kconfig := Kconfig
 endif
 
-ifndef KBUILD_CONFIG_DIR
-KBUILD_CONFIG_DIR=arch/$(SRCARCH)/configs
-endif
-
 # We need this, in case the user has it in its environment
 unexport CONFIG_
 
@@ -102,11 +98,11 @@ ifeq ($(KBUILD_DEFCONFIG),)
 	$< --defconfig $(Kconfig)
 else
 	@echo "*** Default configuration is based on '$(KBUILD_DEFCONFIG)'"
-	$(Q)$< --defconfig=$(KBUILD_CONFIG_DIR)/$(KBUILD_DEFCONFIG) $(Kconfig)
+	$(Q)$< --defconfig=arch/$(SRCARCH)/configs/$(KBUILD_DEFCONFIG) $(Kconfig)
 endif
 
 %_defconfig: $(obj)/conf
-	$(Q)$< --defconfig=$(KBUILD_CONFIG_DIR)/$@ $(Kconfig)
+	$(Q)$< --defconfig=arch/$(SRCARCH)/configs/$@ $(Kconfig)
 
 # Help text used by make help
 help:

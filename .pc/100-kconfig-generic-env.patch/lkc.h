@@ -21,21 +21,6 @@ static inline char *bind_textdomain_codeset(const char *dn, char *c) { return c;
 extern "C" {
 #endif
 
-#ifndef PRODUCT_ENV
-/* BR2 for buildroot, KCONFIG for kernel. */
-#define PRODUCT_ENV "KCONFIG"
-#endif
-
-#ifndef PRODUCT
-/* Buildroot buildroot, Kernel for kernel. */
-#define PRODUCT "Kernel"
-#endif
-
-#ifndef PRODUCT_DOMAIN
-/* buildroot.org for buildroot, kernel.org for kernel. */
-#define PRODUCT_DOMAIN "kernel.org"
-#endif
-
 #define P(name,type,arg)	extern type name arg
 #include "lkc_proto.h"
 #undef P

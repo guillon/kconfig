@@ -64,14 +64,14 @@ static void conf_message(const char *fmt, ...)
 
 const char *conf_get_configname(void)
 {
-	char *name = getenv(PRODUCT_ENV"_CONFIG");
+	char *name = getenv("BR2_CONFIG");
 
 	return name ? name : ".config";
 }
 
 const char *conf_get_autoconfig_name(void)
 {
-	return getenv(PRODUCT_ENV"_AUTOCONFIG");
+	return getenv("KCONFIG_AUTOCONFIG");
 }
 
 static char *conf_expand_value(const char *in)
@@ -767,7 +767,7 @@ int conf_write(const char *name)
 		basename = conf_get_configname();
 
 	sprintf(newname, "%s%s", dirname, basename);
-	env = getenv(PRODUCT_ENV"_OVERWRITECONFIG");
+	env = getenv("KCONFIG_OVERWRITECONFIG");
 	if (!env || !*env) {
 		sprintf(tmpname, "%s.tmpconfig.%d", dirname, (int)getpid());
 		out = fopen(tmpname, "w");
@@ -1027,13 +1027,13 @@ int conf_write_autoconf(void)
 	fclose(tristate);
 	fclose(out_h);
 
-	name = getenv(PRODUCT_ENV"_AUTOHEADER");
+	name = getenv("KCONFIG_AUTOHEADER");
 	if (!name)
 		name = "include/generated/autoconf.h";
 	sprintf(buf, "%s.tmpconfig.h", dir);
 	if (rename(buf, name))
 		return 1;
-	name = getenv(PRODUCT_ENV"_TRISTATE");
+	name = getenv("KCONFIG_TRISTATE");
 	if (!name)
 		name = "include/config/tristate.conf";
 	sprintf(buf, "%s.tmpconfig_tristate", dir);
@@ -1159,7 +1159,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
 				   * -Wmaybe-uninitialized */
 	if (mode == def_random) {
 		int n, p[3];
-		char *env = getenv(PRODUCT_ENV"_PROBABILITY");
+		char *env = getenv("KCONFIG_PROBABILITY");
 		n = 0;
 		while( env && *env ) {
 			char *endp;
@@ -1168,7 +1168,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
 				p[n++] = tmp;
 			} else {
 				errno = ERANGE;
-				perror( PRODUCT_ENV"_PROBABILITY" );
+				perror( "KCONFIG_PROBABILITY" );
 				exit( 1 );
 			}
 			env = (*endp == ':') ? endp+1 : endp;
@@ -1190,7 +1190,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
 
 		if( pty+ptm > 100 ) {
 			errno = ERANGE;
-			perror( PRODUCT_ENV"_PROBABILITY" );
+			perror( "KCONFIG_PROBABILITY" );
 			exit( 1 );
 		}
 	}

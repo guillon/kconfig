@@ -70,7 +70,7 @@ static inline QString qgettext(const QString& str)
 }
 
 ConfigSettings::ConfigSettings()
-	: QSettings(PRODUCT_DOMAIN, "qconf")
+	: QSettings("buildroot.org", "qconf")
 {
 }
 
