@@ -1,34 +1,34 @@
-src := .
-top_srcdir=../../
-top_builddir=../../
-srctree := .
+src ?= .
+top_srcdir ?= ../../
+top_builddir ?= ../../
+srctree ?= .
 obj ?= .
 
-include Makefile
+include $(src)/Makefile
 #HOSTCFLAGS+=-Dinline="" -include foo.h
 -include $(obj)/.depend
 $(obj)/.depend: $(wildcard *.h *.c)
 	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) -MM *.c > $@ 2>/dev/null || :
 
 __hostprogs := $(sort $(hostprogs-y) $(hostprogs-m))
-host-csingle := $(foreach m,$(__hostprogs),$(if $($(m)-objs),,$(m)))
-host-cmulti := $(foreach m,$(__hostprogs),\
-           $(if $($(m)-cxxobjs),,$(if $($(m)-objs),$(m))))
-host-cxxmulti := $(foreach m,$(__hostprogs),\
-           $(if $($(m)-cxxobjs),$(m),$(if $($(m)-objs),)))
+host-csingle := $(addprefix $(obj)/,$(foreach m,$(__hostprogs),$(if $($(m)-objs),,$(m))))
+host-cmulti := $(addprefix $(obj)/,$(foreach m,$(__hostprogs),\
+           $(if $($(m)-cxxobjs),,$(if $($(m)-objs),$(m)))))
+host-cxxmulti := $(addprefix $(obj)/,$(foreach m,$(__hostprogs),\
+           $(if $($(m)-cxxobjs),$(m),$(if $($(m)-objs),))))
 host-cobjs := $(addprefix $(obj)/,$(sort $(foreach m,$(__hostprogs),$($(m)-objs))))
 host-cxxobjs := $(addprefix $(obj)/,$(sort $(foreach m,$(__hostprogs),$($(m)-cxxobjs))))
 
 HOST_EXTRACFLAGS += -I$(obj) -DCONFIG_=\"\"
 
 $(host-csingle): %: %.c
-	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$@) $< -o $(obj)/$@
+	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$(@F)) $< -o $@
 
 $(host-cmulti): %: $(host-cobjs) $(host-cshlib)
-	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$@) $(addprefix $(obj)/,$($(@F)-objs)) $(HOSTLOADLIBES_$(@F)) -o $(obj)/$@
+	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$(@F)) $(addprefix $(obj)/,$($(@F)-objs)) $(HOSTLOADLIBES_$(@F)) -o $@
 
 $(host-cxxmulti): %: $(host-cxxobjs) $(host-cobjs) $(host-cshlib)
-	$(HOSTCXX) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCXXFLAGS_$@) $(addprefix $(obj)/,$($(@F)-objs) $($(@F)-cxxobjs)) $(HOSTLOADLIBES_$(@F)) -o $(obj)/$@
+	$(HOSTCXX) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCXXFLAGS_$(@F)) $(addprefix $(obj)/,$($(@F)-objs) $($(@F)-cxxobjs)) $(HOSTLOADLIBES_$(@F)) -o $@
 
 $(obj)/%.o: %.c
 	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$(@F)) -c $< -o $@
