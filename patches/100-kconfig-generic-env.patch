@@ -11,11 +11,11 @@
  zconf.y             |    2 +-
  11 files changed, 42 insertions(+), 22 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index 7eb4071..9dade34 100644
---- a/Makefile
-+++ b/Makefile
-@@ -11,6 +11,10 @@ else
+Index: kconfig/Makefile
+===================================================================
+--- kconfig.orig/Makefile	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/Makefile	2014-05-20 13:13:21.000000000 +0200
+@@ -11,6 +11,10 @@
  Kconfig := Kconfig
  endif
  
@@ -26,7 +26,7 @@ index 7eb4071..9dade34 100644
  # We need this, in case the user has it in its environment
  unexport CONFIG_
  
-@@ -98,11 +102,11 @@ ifeq ($(KBUILD_DEFCONFIG),)
+@@ -98,11 +102,11 @@
  	$< --defconfig $(Kconfig)
  else
  	@echo "*** Default configuration is based on '$(KBUILD_DEFCONFIG)'"
@@ -40,11 +40,11 @@ index 7eb4071..9dade34 100644
  
  # Help text used by make help
  help:
-diff --git a/conf.c b/conf.c
-index 553fc76..6780bd3 100644
---- a/conf.c
-+++ b/conf.c
-@@ -524,7 +524,7 @@ int main(int ac, char **av)
+Index: kconfig/conf.c
+===================================================================
+--- kconfig.orig/conf.c	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/conf.c	2014-05-20 13:13:21.000000000 +0200
+@@ -524,7 +524,7 @@
  			gettimeofday(&now, NULL);
  			seed = (unsigned int)((now.tv_sec + 1) * (now.tv_usec + 1));
  
@@ -53,7 +53,7 @@ index 553fc76..6780bd3 100644
  			if( seed_env && *seed_env ) {
  				char *endp;
  				int tmp = (int)strtol(seed_env, &endp, 0);
-@@ -532,7 +532,7 @@ int main(int ac, char **av)
+@@ -532,7 +532,7 @@
  					seed = tmp;
  				}
  			}
@@ -62,7 +62,7 @@ index 553fc76..6780bd3 100644
  			srand(seed);
  			break;
  		}
-@@ -595,7 +595,7 @@ int main(int ac, char **av)
+@@ -595,7 +595,7 @@
  	case allmodconfig:
  	case alldefconfig:
  	case randconfig:
@@ -71,7 +71,7 @@ index 553fc76..6780bd3 100644
  		if (!name)
  			break;
  		if ((strcmp(name, "") != 0) && (strcmp(name, "1") != 0)) {
-@@ -618,7 +618,7 @@ int main(int ac, char **av)
+@@ -618,7 +618,7 @@
  		if (conf_read_simple(name, S_DEF_USER) &&
  		    conf_read_simple("all.config", S_DEF_USER)) {
  			fprintf(stderr,
@@ -80,7 +80,7 @@ index 553fc76..6780bd3 100644
  				name);
  			exit(1);
  		}
-@@ -629,7 +629,7 @@ int main(int ac, char **av)
+@@ -629,7 +629,7 @@
  
  	if (sync_kconfig) {
  		if (conf_get_changed()) {
@@ -89,11 +89,11 @@ index 553fc76..6780bd3 100644
  			if (name && *name) {
  				fprintf(stderr,
  					_("\n*** The configuration requires explicit update.\n\n"));
-diff --git a/confdata.c b/confdata.c
-index 2371fa8..506a956 100644
---- a/confdata.c
-+++ b/confdata.c
-@@ -64,14 +64,14 @@ static void conf_message(const char *fmt, ...)
+Index: kconfig/confdata.c
+===================================================================
+--- kconfig.orig/confdata.c	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/confdata.c	2014-05-20 13:13:21.000000000 +0200
+@@ -64,14 +64,14 @@
  
  const char *conf_get_configname(void)
  {
@@ -110,7 +110,7 @@ index 2371fa8..506a956 100644
  }
  
  static char *conf_expand_value(const char *in)
-@@ -767,7 +767,7 @@ int conf_write(const char *name)
+@@ -767,7 +767,7 @@
  		basename = conf_get_configname();
  
  	sprintf(newname, "%s%s", dirname, basename);
@@ -119,7 +119,7 @@ index 2371fa8..506a956 100644
  	if (!env || !*env) {
  		sprintf(tmpname, "%s.tmpconfig.%d", dirname, (int)getpid());
  		out = fopen(tmpname, "w");
-@@ -1027,13 +1027,13 @@ int conf_write_autoconf(void)
+@@ -1027,13 +1027,13 @@
  	fclose(tristate);
  	fclose(out_h);
  
@@ -135,7 +135,7 @@ index 2371fa8..506a956 100644
  	if (!name)
  		name = "include/config/tristate.conf";
  	sprintf(buf, "%s.tmpconfig_tristate", dir);
-@@ -1159,7 +1159,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
+@@ -1159,7 +1159,7 @@
  				   * -Wmaybe-uninitialized */
  	if (mode == def_random) {
  		int n, p[3];
@@ -144,7 +144,7 @@ index 2371fa8..506a956 100644
  		n = 0;
  		while( env && *env ) {
  			char *endp;
-@@ -1168,7 +1168,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
+@@ -1168,7 +1168,7 @@
  				p[n++] = tmp;
  			} else {
  				errno = ERANGE;
@@ -153,7 +153,7 @@ index 2371fa8..506a956 100644
  				exit( 1 );
  			}
  			env = (*endp == ':') ? endp+1 : endp;
-@@ -1190,7 +1190,7 @@ bool conf_set_all_new_symbols(enum conf_def_mode mode)
+@@ -1190,7 +1190,7 @@
  
  		if( pty+ptm > 100 ) {
  			errno = ERANGE;
@@ -162,11 +162,11 @@ index 2371fa8..506a956 100644
  			exit( 1 );
  		}
  	}
-diff --git a/expr.h b/expr.h
-index ba663e1..6d23580 100644
---- a/expr.h
-+++ b/expr.h
-@@ -93,7 +93,7 @@ struct symbol {
+Index: kconfig/expr.h
+===================================================================
+--- kconfig.orig/expr.h	2014-05-20 13:12:12.000000000 +0200
++++ kconfig/expr.h	2014-05-20 13:13:21.000000000 +0200
+@@ -93,7 +93,7 @@
  #define SYMBOL_CHOICEVAL  0x0020  /* used as a value in a choice block */
  #define SYMBOL_VALID      0x0080  /* set when symbol.curr is calculated */
  #define SYMBOL_OPTIONAL   0x0100  /* choice is optional - values can be 'n' */
@@ -175,10 +175,10 @@ index ba663e1..6d23580 100644
  #define SYMBOL_CHANGED    0x0400  /* ? */
  #define SYMBOL_AUTO       0x1000  /* value from environment variable */
  #define SYMBOL_CHECKED    0x2000  /* used during dependency checking */
-diff --git a/gconf.glade b/gconf.glade
-index 6cbc1bb..d95dc73 100644
---- a/gconf.glade
-+++ b/gconf.glade
+Index: kconfig/gconf.glade
+===================================================================
+--- kconfig.orig/gconf.glade	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/gconf.glade	2014-05-20 13:13:21.000000000 +0200
 @@ -4,7 +4,7 @@
  
  <widget class="GtkWindow" id="window1">
@@ -188,11 +188,11 @@ index 6cbc1bb..d95dc73 100644
    <property name="type">GTK_WINDOW_TOPLEVEL</property>
    <property name="window_position">GTK_WIN_POS_NONE</property>
    <property name="modal">False</property>
-diff --git a/lkc.h b/lkc.h
-index 09f4edf..80ea01f 100644
---- a/lkc.h
-+++ b/lkc.h
-@@ -21,6 +21,21 @@ static inline char *bind_textdomain_codeset(const char *dn, char *c) { return c;
+Index: kconfig/lkc.h
+===================================================================
+--- kconfig.orig/lkc.h	2014-05-20 13:12:12.000000000 +0200
++++ kconfig/lkc.h	2014-05-20 13:13:21.000000000 +0200
+@@ -21,6 +21,21 @@
  extern "C" {
  #endif
  
@@ -214,11 +214,11 @@ index 09f4edf..80ea01f 100644
  #define P(name,type,arg)	extern type name arg
  #include "lkc_proto.h"
  #undef P
-diff --git a/mconf.c b/mconf.c
-index 7d6cf80..3151255 100644
---- a/mconf.c
-+++ b/mconf.c
-@@ -959,7 +959,7 @@ static int handle_exit(void)
+Index: kconfig/mconf.c
+===================================================================
+--- kconfig.orig/mconf.c	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/mconf.c	2014-05-20 13:13:21.000000000 +0200
+@@ -959,7 +959,7 @@
  	if (conf_get_changed())
  		res = dialog_yesno(NULL,
  				   _("Do you wish to save your new configuration?\n"
@@ -227,11 +227,11 @@ index 7d6cf80..3151255 100644
  				   6, 60);
  	else
  		res = -1;
-diff --git a/merge_config.sh b/merge_config.sh
-index 81b0c61..88d278c 100755
---- a/merge_config.sh
-+++ b/merge_config.sh
-@@ -131,7 +131,8 @@ fi
+Index: kconfig/merge_config.sh
+===================================================================
+--- kconfig.orig/merge_config.sh	2014-05-20 13:12:12.000000000 +0200
++++ kconfig/merge_config.sh	2014-05-20 13:13:21.000000000 +0200
+@@ -131,7 +131,8 @@
  # Use the merged file as the starting point for:
  # alldefconfig: Fills in any missing symbols with Kconfig default
  # allnoconfig: Fills in any missing symbols with # CONFIG_* is not set
@@ -241,11 +241,11 @@ index 81b0c61..88d278c 100755
  
  
  # Check all specified config values took (might have missed-dependency issues)
-diff --git a/qconf.cc b/qconf.cc
-index f630567..2443af1 100644
---- a/qconf.cc
-+++ b/qconf.cc
-@@ -70,7 +70,7 @@ static inline QString qgettext(const QString& str)
+Index: kconfig/qconf.cc
+===================================================================
+--- kconfig.orig/qconf.cc	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/qconf.cc	2014-05-20 13:13:21.000000000 +0200
+@@ -70,7 +70,7 @@
  }
  
  ConfigSettings::ConfigSettings()
@@ -254,11 +254,11 @@ index f630567..2443af1 100644
  {
  }
  
-diff --git a/zconf.tab.c_shipped b/zconf.tab.c_shipped
-index f343030..81d1319 100644
---- a/zconf.tab.c_shipped
-+++ b/zconf.tab.c_shipped
-@@ -2297,7 +2297,7 @@ void conf_parse(const char *name)
+Index: kconfig/zconf.tab.c_shipped
+===================================================================
+--- kconfig.orig/zconf.tab.c_shipped	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/zconf.tab.c_shipped	2014-05-20 13:13:21.000000000 +0200
+@@ -2297,7 +2297,7 @@
  
  	sym_init();
  	_menu_init();
@@ -267,11 +267,11 @@ index f343030..81d1319 100644
  
  	if (getenv("ZCONF_DEBUG"))
  		zconfdebug = 1;
-diff --git a/zconf.y b/zconf.y
-index 08ac041..33b4a54 100644
---- a/zconf.y
-+++ b/zconf.y
-@@ -493,7 +493,7 @@ void conf_parse(const char *name)
+Index: kconfig/zconf.y
+===================================================================
+--- kconfig.orig/zconf.y	2014-05-20 13:13:21.000000000 +0200
++++ kconfig/zconf.y	2014-05-20 13:13:21.000000000 +0200
+@@ -493,7 +493,7 @@
  
  	sym_init();
  	_menu_init();

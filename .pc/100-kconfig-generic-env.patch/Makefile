@@ -159,11 +159,11 @@ gconf-objs	:= gconf.o zconf.tab.o
 
 hostprogs-y := conf
 
-ifeq ($(MAKECMDGOALS),nconf)
+ifeq ($(MAKECMDGOALS),nconfig)
 	hostprogs-y += nconf
 endif
 
-ifeq ($(MAKECMDGOALS),mconf)
+ifeq ($(MAKECMDGOALS),menuconfig)
 	hostprogs-y += mconf
 endif
 
@@ -171,10 +171,10 @@ ifeq ($(MAKECMDGOALS),update-po-config)
 	hostprogs-y += kxgettext
 endif
 
-ifeq ($(MAKECMDGOALS),qconf)
+ifeq ($(MAKECMDGOALS),xconfig)
 	qconf-target := 1
 endif
-ifeq ($(MAKECMDGOALS),gconf)
+ifeq ($(MAKECMDGOALS),gconfig)
 	gconf-target := 1
 endif
 
